@@ -1,1 +1,155 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Konstitusiya Məhkəməsi - Qərarlar</title>
+    <style>
+        :root { font-family: system-ui, Arial, sans-serif; color: #182338; background: #f4f6fa; }
+        body { margin: 0; }
+        header { background: #172b4d; color: white; padding: 23px 5%; }
+        h1 { font-size: 24px; margin: 0 0 9px; }
+        main { max-width: 1180px; margin: 24px auto; padding: 0 14px; }
+        input, select { box-sizing: border-box; padding: 12px; border: 1px solid #c6ccda; border-radius: 8px; background: #fff; font: inherit; }
+        input { width: 100%; }
+        .filter { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+        .layout { display: grid; grid-template-columns: 38% 1fr; gap: 16px; }
+        .panel { background: white; border-radius: 12px; box-shadow: 0 1px 4px #d9deea; overflow: hidden; }
+        .results { height: 70vh; overflow: auto; }
+        .item { padding: 14px; border-bottom: 1px solid #e5e7eb; cursor: pointer; }
+        .item:hover, .item.selected { background: #eff5ff; }
+        .item small { color: #5a6880; display: block; margin-top: 4px; }
+        .body { padding: 22px; height: 70vh; overflow: auto; white-space: pre-wrap; line-height: 1.6; overflow-wrap: anywhere; }
+        .body h2 { font-size: 20px; white-space: normal; }
+        a { color: #174d99; }
+        .hint { color: #5a6880; font-size: 13px; margin-bottom: 12px; }
+        @media(max-width: 750px) {
+            .layout { grid-template-columns: 1fr; }
+            .filter { grid-template-columns: 1fr; }
+            .results { height: 34vh; }
+            .body { height: 60vh; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Konstitusiya Məhkəməsi — Qərarların Axtarışı</h1>
+        <div id="total" style="font-size: 14px; opacity: 0.8;"></div>
+    </header>
+    <main>
+        <div class="filter">
+            <input type="search" id="q" placeholder="Tam mətndə söz və ya ifadə axtarın...">
+            <input type="number" min="1900" max="2100" id="yr" placeholder="İl (məs. 2026)">
+            <select id="kind">
+                <option value="">Bütün sənəd növləri</option>
+                <option value="Qərar">Qərar</option>
+                <option value="Qərardad">Qərardad</option>
+            </select>
+        </div>
+        <div id="count" class="hint"></div>
+        <div class="layout">
+            <div id="results" class="panel results"></div>
+            <article id="detail" class="panel body">Soldan siyahıdan bir qərar seçin.</article>
+        </div>
+    </main>
 
+    <script>
+        const dataset = [
+            {
+                id: 1624,
+                title: "İnzibati Xətalar Məcəlləsinin 262 və 264-cü maddələrinin şərh edilməsi",
+                date: "2026-10-13",
+                type: "Qərardad",
+                body: "AZƏRBAYCAN RESPUBLİKASI ADINDAN\nKonstitusiya Məhkəməsi Plenumunun QƏRARDADI\nCəbrayıl Rayon Məhkəməsinin müraciəti əsasında İnzibati Xətalar Məcəlləsinin 262 və 264-cü maddələrinin şərh edilməsinə dair...",
+                url: "https://constcourt.gov.az/az/decision/1624"
+            },
+            {
+                id: 1625,
+                title: "Cinayət Məcəlləsinin 79.1-ci maddəsinin Konstitusiyaya uyğunluğunun yoxlanılması",
+                date: "2026-10-12",
+                type: "Qərar",
+                body: "AZƏRBAYCAN RESPUBLİKASI ADINDAN\nKonstitusiya Məhkəməsi Plenumunun QƏRARI\nAzərbaycan Respublikasının İnsan hüquqları üzrə müvəkkilinin (ombudsmanın) sorğusu əsasında Cinayət Məcəlləsinin 79.1-ci maddəsinin yoxlanılması...",
+                url: "https://constcourt.gov.az/az/decision/1625"
+            },
+            {
+                id: 1623,
+                title: "Mülki Məcəllənin 140, 181, 182, 314 və 650-ci maddələrinin əlaqəli şəkildə şərhi",
+                date: "2026-09-25",
+                type: "Qərardad",
+                body: "AZƏRBAYCAN RESPUBLİKASI ADINDAN\nKonstitusiya Məhkəməsi Plenumunun QƏRARDADI\nBakı Apellyasiya Məhkəməsinin müraciəti əsasında Mülki Məcəllənin müvafiq maddələrinin şərh edilməsinə dair...",
+                url: "https://constcourt.gov.az/az/decision/1623"
+            },
+            {
+                id: 1620,
+                title: "Cinayət Məcəlləsinin 133.1-ci maddəsinin Konstitusiyaya uyğunluğunun yoxlanılması",
+                date: "2026-09-22",
+                type: "Qərar",
+                body: "AZƏRBAYCAN RESPUBLİKASI ADINDAN\nKonstitusiya Məhkəməsi Plenumunun QƏRARI\nOmbudsmanın sorğusu əsasında Cinayət Məcəlləsinin 133.1-ci maddəsinin (Əzab vermə) şərh edilməsinə dair...",
+                url: "https://constcourt.gov.az/az/decision/1620"
+            }
+        ];
+
+        const searchInput = document.getElementById('q');
+        const yearInput = document.getElementById('yr');
+        const kindSelect = document.getElementById('kind');
+        const resultsContainer = document.getElementById('results');
+        const detailContainer = document.getElementById('detail');
+        const countContainer = document.getElementById('count');
+        const totalContainer = document.getElementById('total');
+
+        totalContainer.innerText = `Cəmi sənəd sayı: ${dataset.length}`;
+
+        function renderList(items) {
+            resultsContainer.innerHTML = '';
+            if (items.length === 0) {
+                resultsContainer.innerHTML = '<div style="padding: 20px; text-align: center; color: #64748b;">Heç nə tapılmadı.</div>';
+                countContainer.innerText = '0 sənəd tapıldı';
+                return;
+            }
+            countContainer.innerText = `${items.length} sənəd tapıldı`;
+
+            items.forEach((item, index) => {
+                const div = document.createElement('div');
+                div.className = 'item';
+                if (index === 0) div.classList.add('selected');
+                div.innerHTML = `<strong>${item.title}</strong><small>${item.date} | <b>${item.type}</b></small>`;
+                div.onclick = () => {
+                    document.querySelectorAll('.item').forEach(el => el.classList.remove('selected'));
+                    div.classList.add('selected');
+                    showDetail(item);
+                };
+                resultsContainer.appendChild(div);
+            });
+            if (items.length > 0) showDetail(items[0]);
+        }
+
+        function showDetail(item) {
+            detailContainer.innerHTML = `<h2>${item.title}</h2>
+<p><b>Tarix:</b> ${item.date} | <b>Növ:</b> ${item.type}</p>
+<p><a href="${item.url}" target="_blank">Rəsmi mənbədə bax</a></p>
+<hr style="border:0; border-top:1px solid #e5e7eb; margin: 15px 0;">
+<div>${item.body}</div>`;
+        }
+
+        function filterData() {
+            const query = searchInput.value.toLowerCase();
+            const year = yearInput.value;
+            const kind = kindSelect.value;
+
+            const filtered = dataset.filter(item => {
+                const matchesQuery = item.title.toLowerCase().includes(query) || item.body.toLowerCase().includes(query);
+                const matchesYear = year ? item.date.startsWith(year) : true;
+                const matchesKind = kind ? item.type === kind : true;
+                return matchesQuery && matchesYear && matchesKind;
+            });
+            renderList(filtered);
+        }
+
+        searchInput.addEventListener('input', filterData);
+        yearInput.addEventListener('input', filterData);
+        kindSelect.addEventListener('change', filterData);
+
+        renderList(dataset);
+    </script>
+</body>
+</html>

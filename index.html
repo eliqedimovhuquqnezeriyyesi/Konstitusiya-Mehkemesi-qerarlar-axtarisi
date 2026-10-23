@@ -8,6 +8,14 @@
         :root{font-family:system-ui,Arial,sans-serif;color:#182338;background:#f4f6fa}
         body{margin:0;display:flex;flex-direction:column;min-height:100vh;justify-content:center;align-items:center}
         .container{max-width:800px;text-align:center;padding:20px}
+        
+        /* Logo üçün üslub */
+        .logo {
+            max-width: 100px; /* Loqonun maksimal eni */
+            height: auto;
+            margin-bottom: 20px;
+        }
+
         h1{font-size:28px;color:#172b4d;margin-bottom:10px}
         p{color:#5a6880;margin-bottom:40px}
         .cards{display:grid;grid-template-columns:1fr 1fr;gap:20px}
@@ -19,7 +27,10 @@
 </head>
 <body>
     <div class="container">
-        <h1>Azərbaycan Respublikası Məhkəmə Qərarları Portalı</h1>
+        <!-- Bura loqonuzun adını yazın (məsələn: logo.png) -->
+        <img src="logo-esas.png" alt="Portal Logo" class="logo">
+        
+        <h1>Məhkəmə qərarlarının axtarışı portalı</h1>
         <p>Axtarış etmək istədiyiniz məhkəmə instansiyasını seçin:</p>
         
         <div class="cards">
